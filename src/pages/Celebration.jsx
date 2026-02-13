@@ -27,6 +27,7 @@ export default function Celebration({ onNext }) {
 
         <motion.h1
           className="font-cursive text-4xl sm:text-6xl text-gold-light mb-5 leading-tight"
+          style={{ textShadow: '0 0 20px rgba(255,215,0,0.3)' }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -35,7 +36,7 @@ export default function Celebration({ onNext }) {
         </motion.h1>
 
         <motion.p
-          className="text-xl sm:text-2xl text-rose-light mb-3 font-light"
+          className="text-xl sm:text-2xl text-rose-light mb-3 font-medium"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
@@ -54,8 +55,14 @@ export default function Celebration({ onNext }) {
 
         <motion.button
           onClick={onNext}
-          className="px-12 py-5 rounded-2xl bg-gradient-to-r from-gold-dark to-gold text-dark text-lg font-bold tracking-wide animate-float cursor-pointer"
-          whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(218, 165, 32, 0.4)' }}
+          className="px-14 py-5 rounded-2xl text-dark text-lg font-bold tracking-wide cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #DAA520, #FFD700)',
+            boxShadow: '0 0 30px rgba(218,165,32,0.4), 0 0 60px rgba(218,165,32,0.15)',
+            border: '2px solid rgba(255,255,255,0.15)',
+            fontFamily: "'Quicksand', sans-serif",
+          }}
+          whileHover={{ scale: 1.05, boxShadow: '0 0 45px rgba(218,165,32,0.6), 0 0 80px rgba(218,165,32,0.2)' }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

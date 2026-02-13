@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import StarField from '../components/StarField'
 
 const SIZE = 3
 const TOTAL = SIZE * SIZE
 const EMPTY = TOTAL - 1
+const IMG = '/Screenshot_2026-02-13_at_10.26.55_PM.png'
 
 const ENCOURAGEMENTS = [
   'Arre wah Bubu!',
@@ -48,7 +49,6 @@ export default function Puzzle({ onNext }) {
   const [solved, setSolved] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [encouragement, setEncouragement] = useState('')
-  const boardRef = useRef(null)
 
   useEffect(() => {
     if (phase === 'intro') {
@@ -92,7 +92,8 @@ export default function Puzzle({ onNext }) {
     setTimeout(() => setShowHint(false), 2000)
   }
 
-  const tileSize = 100 / SIZE
+  const gap = 3
+  const tilePercent = (100 - gap * (SIZE - 1)) / SIZE
 
   return (
     <motion.div
@@ -110,17 +111,13 @@ export default function Puzzle({ onNext }) {
           {phase === 'intro' && (
             <motion.div
               key="intro"
-              className="space-y-5"
+              className="space-y-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
               <div className="rounded-2xl overflow-hidden border-2 border-gold/30 shadow-lg shadow-gold/10">
-                <img
-                  src="/Screenshot_2026-02-13_at_10.26.55_PM.png"
-                  alt="Us"
-                  className="w-full"
-                />
+                <img src={IMG} alt="Us" className="w-full" />
               </div>
               <p className="font-cursive text-xl sm:text-2xl text-rose-light px-2 leading-relaxed">
                 Ye dekho Buggu humari photo... par thodi bikhar gayi hai, jaise tumhare bina meri zindagi bikhar jaati hai
@@ -135,15 +132,21 @@ export default function Puzzle({ onNext }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <h2 className="font-cursive text-2xl sm:text-3xl text-rose-light mb-5">
+              <h2
+                className="font-cursive text-3xl sm:text-4xl text-rose-light mb-6"
+                style={{ textShadow: '0 0 15px rgba(255,107,129,0.3)' }}
+              >
                 Photo jodo Bubu!
               </h2>
 
-              <div className="relative mx-auto" style={{ width: '100%', maxWidth: 300 }}>
+              <div className="relative mx-auto" style={{ width: '100%', maxWidth: 320 }}>
                 <div
-                  ref={boardRef}
-                  className="relative w-full rounded-xl overflow-hidden border-2 border-rose-warm/20"
-                  style={{ paddingBottom: '100%' }}
+                  className="relative w-full rounded-2xl overflow-hidden border-2 border-rose-warm/20"
+                  style={{
+                    paddingBottom: '100%',
+                    background: 'rgba(26,10,10,0.6)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  }}
                 >
                   {tiles.map((tile, index) => {
                     if (tile === EMPTY) return null
@@ -153,24 +156,28 @@ export default function Puzzle({ onNext }) {
                     const sourceRow = Math.floor(tile / SIZE)
                     const sourceCol = tile % SIZE
 
+                    const left = currentCol * (tilePercent + gap)
+                    const top = currentRow * (tilePercent + gap)
+
                     return (
                       <motion.div
                         key={tile}
-                        className="absolute cursor-pointer overflow-hidden"
+                        className="absolute cursor-pointer overflow-hidden rounded-lg"
                         onClick={() => handleTileClick(index)}
                         animate={{
-                          left: `${currentCol * tileSize}%`,
-                          top: `${currentRow * tileSize}%`,
+                          left: `${left}%`,
+                          top: `${top}%`,
                         }}
                         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                        whileTap={{ scale: 0.92 }}
+                        whileTap={{ scale: 0.93 }}
+                        whileHover={{ brightness: 1.1 }}
                         style={{
-                          width: `${tileSize}%`,
-                          height: `${tileSize}%`,
-                          backgroundImage: 'url(/Screenshot_2026-02-13_at_10.26.55_PM.png)',
+                          width: `${tilePercent}%`,
+                          height: `${tilePercent}%`,
+                          backgroundImage: `url(${IMG})`,
                           backgroundSize: `${SIZE * 100}% ${SIZE * 100}%`,
-                          backgroundPosition: `${sourceCol * (100 / (SIZE - 1))}% ${sourceRow * (100 / (SIZE - 1))}%`,
-                          border: '1px solid rgba(26, 10, 10, 0.6)',
+                          backgroundPosition: `${sourceCol * 50}% ${sourceRow * 50}%`,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
                         }}
                       />
                     )
@@ -181,13 +188,13 @@ export default function Puzzle({ onNext }) {
                       <motion.div
                         className="absolute inset-0 z-10"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.85 }}
+                        animate={{ opacity: 0.9 }}
                         exit={{ opacity: 0 }}
                       >
                         <img
-                          src="/Screenshot_2026-02-13_at_10.26.55_PM.png"
+                          src={IMG}
                           alt="Hint"
-                          className="w-full h-full object-cover rounded-xl"
+                          className="w-full h-full object-cover rounded-2xl"
                         />
                       </motion.div>
                     )}
@@ -195,14 +202,23 @@ export default function Puzzle({ onNext }) {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-5 px-2">
-                <span className="text-rose-light/40 text-sm font-light">Moves: {moves}</span>
-                <button
+              <div className="flex items-center justify-between mt-6 px-2">
+                <span className="text-rose-light/50 text-sm font-medium">
+                  Moves: <span className="text-gold-light">{moves}</span>
+                </span>
+                <motion.button
                   onClick={handleHint}
-                  className="px-5 py-2.5 rounded-xl bg-dark-mid border border-gold/15 text-gold-light text-sm cursor-pointer transition-all hover:bg-gold/10 hover:border-gold/30"
+                  className="px-6 py-2.5 rounded-xl border cursor-pointer text-sm font-semibold"
+                  style={{
+                    background: 'rgba(218,165,32,0.1)',
+                    borderColor: 'rgba(218,165,32,0.25)',
+                    color: '#FFD700',
+                  }}
+                  whileHover={{ scale: 1.05, background: 'rgba(218,165,32,0.2)' }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Peek
-                </button>
+                </motion.button>
               </div>
 
               <AnimatePresence>
@@ -228,15 +244,12 @@ export default function Puzzle({ onNext }) {
               transition={{ type: 'spring', stiffness: 200 }}
             >
               <div className="rounded-2xl overflow-hidden border-2 border-gold/40 shadow-lg shadow-gold/20 mb-8">
-                <img
-                  src="/Screenshot_2026-02-13_at_10.26.55_PM.png"
-                  alt="Us"
-                  className="w-full"
-                />
+                <img src={IMG} alt="Us" className="w-full" />
               </div>
 
               <motion.p
-                className="font-cursive text-2xl sm:text-3xl text-gold-light mb-2"
+                className="font-cursive text-3xl sm:text-4xl text-gold-light mb-2"
+                style={{ textShadow: '0 0 15px rgba(255,215,0,0.3)' }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
@@ -244,7 +257,7 @@ export default function Puzzle({ onNext }) {
                 Dekha Babu?
               </motion.p>
               <motion.p
-                className="text-rose-light text-lg mb-8 font-light"
+                className="text-rose-light text-lg sm:text-xl mb-8 font-light"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.0 }}
@@ -262,8 +275,12 @@ export default function Puzzle({ onNext }) {
 
               <motion.button
                 onClick={onNext}
-                className="px-12 py-5 rounded-2xl bg-gradient-to-r from-gold-dark to-gold text-dark text-lg font-bold cursor-pointer"
-                whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(218, 165, 32, 0.4)' }}
+                className="px-14 py-5 rounded-2xl text-dark text-lg font-bold cursor-pointer border-2 border-gold/30"
+                style={{
+                  background: 'linear-gradient(135deg, #DAA520, #FFD700)',
+                  boxShadow: '0 0 30px rgba(218,165,32,0.3)',
+                }}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 45px rgba(218,165,32,0.5)' }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

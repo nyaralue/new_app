@@ -7,20 +7,39 @@ export default function MusicPlayer({ shouldPlay }) {
   const [playing, setPlaying] = useState(false)
   const [ready, setReady] = useState(false)
   const playerRef = useRef(null)
-  const containerRef = useRef(null)
+  const divRef = useRef(null)
+  const initRef = useRef(false)
 
   useEffect(() => {
-    if (!shouldPlay) return
+    if (!shouldPlay || initRef.current) return
+    initRef.current = true
 
-    let player
-    const tag = document.createElement('script')
-    tag.src = 'https://www.youtube.com/iframe_api'
-    document.head.appendChild(tag)
+    const loadApi = () => {
+      if (window.YT && window.YT.Player) {
+        createPlayer()
+        return
+      }
 
-    window.onYouTubeIframeAPIReady = () => {
-      player = new window.YT.Player(containerRef.current, {
-        height: '0',
-        width: '0',
+      const existing = document.querySelector('script[src*="youtube.com/iframe_api"]')
+      if (!existing) {
+        const tag = document.createElement('script')
+        tag.src = 'https://www.youtube.com/iframe_api'
+        document.head.appendChild(tag)
+      }
+
+      const prev = window.onYouTubeIframeAPIReady
+      window.onYouTubeIframeAPIReady = () => {
+        if (prev) prev()
+        createPlayer()
+      }
+    }
+
+    const createPlayer = () => {
+      if (!divRef.current || playerRef.current) return
+
+      playerRef.current = new window.YT.Player(divRef.current, {
+        height: '1',
+        width: '1',
         videoId: VIDEO_ID,
         playerVars: {
           autoplay: 1,
@@ -30,28 +49,26 @@ export default function MusicPlayer({ shouldPlay }) {
           showinfo: 0,
           modestbranding: 1,
           rel: 0,
+          playsinline: 1,
+          origin: window.location.origin,
         },
         events: {
           onReady: (event) => {
-            playerRef.current = event.target
-            event.target.setVolume(40)
+            event.target.setVolume(50)
             event.target.playVideo()
             setReady(true)
             setPlaying(true)
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setPlaying(true)
+            }
           },
         },
       })
     }
 
-    if (window.YT && window.YT.Player) {
-      window.onYouTubeIframeAPIReady()
-    }
-
-    return () => {
-      if (player && player.destroy) {
-        player.destroy()
-      }
-    }
+    loadApi()
   }, [shouldPlay])
 
   const togglePlay = useCallback(() => {
@@ -69,7 +86,18 @@ export default function MusicPlayer({ shouldPlay }) {
 
   return (
     <>
-      <div ref={containerRef} className="hidden" />
+      <div
+        ref={divRef}
+        style={{
+          position: 'fixed',
+          top: '-9999px',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          opacity: 0.01,
+          pointerEvents: 'none',
+        }}
+      />
 
       {ready && (
         <motion.button
