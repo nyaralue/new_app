@@ -5,7 +5,7 @@ import MusicPlayer from './components/MusicPlayer'
 import NameGate from './pages/NameGate'
 import ValentineQuestion from './pages/ValentineQuestion'
 import Celebration from './pages/Celebration'
-import LoveStory from './pages/LoveStory'
+import DoorGame from './pages/DoorGame'
 import Puzzle from './pages/Puzzle'
 import Proposal from './pages/Proposal'
 import Forgiveness from './pages/Forgiveness'
@@ -14,7 +14,7 @@ const PAGES = {
   GATE: 'gate',
   VALENTINE: 'valentine',
   CELEBRATION: 'celebration',
-  STORY: 'story',
+  DOORS: 'doors',
   PUZZLE: 'puzzle',
   PROPOSAL: 'proposal',
   FORGIVENESS: 'forgiveness',
@@ -42,10 +42,10 @@ export default function App() {
           <ValentineQuestion key="valentine" onYes={() => setPage(PAGES.CELEBRATION)} />
         )}
         {page === PAGES.CELEBRATION && (
-          <Celebration key="celebration" onNext={() => setPage(PAGES.STORY)} />
+          <Celebration key="celebration" onNext={() => setPage(PAGES.DOORS)} />
         )}
-        {page === PAGES.STORY && (
-          <LoveStory key="story" onNext={() => setPage(PAGES.PUZZLE)} />
+        {page === PAGES.DOORS && (
+          <DoorGame key="doors" onNext={() => setPage(PAGES.PUZZLE)} />
         )}
         {page === PAGES.PUZZLE && (
           <Puzzle key="puzzle" onNext={() => setPage(PAGES.PROPOSAL)} />

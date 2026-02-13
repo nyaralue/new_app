@@ -1,35 +1,93 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 
+const VIDEO_ID = '6x8HVdS_TJs'
+
 export default function MusicPlayer({ shouldPlay }) {
-  const [muted, setMuted] = useState(false)
-  const [loaded, setLoaded] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [ready, setReady] = useState(false)
+  const playerRef = useRef(null)
+  const containerRef = useRef(null)
 
   useEffect(() => {
-    if (shouldPlay && !loaded) {
-      setLoaded(true)
+    if (!shouldPlay) return
+
+    let player
+    const tag = document.createElement('script')
+    tag.src = 'https://www.youtube.com/iframe_api'
+    document.head.appendChild(tag)
+
+    window.onYouTubeIframeAPIReady = () => {
+      player = new window.YT.Player(containerRef.current, {
+        height: '0',
+        width: '0',
+        videoId: VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          loop: 1,
+          playlist: VIDEO_ID,
+          controls: 0,
+          showinfo: 0,
+          modestbranding: 1,
+          rel: 0,
+        },
+        events: {
+          onReady: (event) => {
+            playerRef.current = event.target
+            event.target.setVolume(40)
+            event.target.playVideo()
+            setReady(true)
+            setPlaying(true)
+          },
+        },
+      })
     }
-  }, [shouldPlay, loaded])
+
+    if (window.YT && window.YT.Player) {
+      window.onYouTubeIframeAPIReady()
+    }
+
+    return () => {
+      if (player && player.destroy) {
+        player.destroy()
+      }
+    }
+  }, [shouldPlay])
+
+  const togglePlay = useCallback(() => {
+    const p = playerRef.current
+    if (!p) return
+
+    if (playing) {
+      p.pauseVideo()
+      setPlaying(false)
+    } else {
+      p.playVideo()
+      setPlaying(true)
+    }
+  }, [playing])
 
   return (
     <>
-      {loaded && (
-        <iframe
-          src={`https://www.youtube.com/embed/6x8HVdS_TJs?autoplay=1&loop=1&playlist=6x8HVdS_TJs&controls=0&showinfo=0&rel=0&mute=${muted ? 1 : 0}`}
-          className="hidden"
-          allow="autoplay; encrypted-media"
-          title="music"
-        />
-      )}
-      {loaded && (
+      <div ref={containerRef} className="hidden" />
+
+      {ready && (
         <motion.button
-          onClick={() => setMuted(!muted)}
-          className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full bg-dark-mid/80 backdrop-blur-md border border-rose-warm/20 flex items-center justify-center text-lg transition-all duration-300 hover:border-rose-warm/50 cursor-pointer"
+          onClick={togglePlay}
+          className="fixed top-5 right-5 z-50 w-12 h-12 rounded-full flex items-center justify-center text-lg cursor-pointer border-2"
+          style={{
+            background: 'rgba(13,5,5,0.9)',
+            borderColor: playing ? 'rgba(220,20,60,0.4)' : 'rgba(255,255,255,0.1)',
+            boxShadow: playing ? '0 0 20px rgba(220,20,60,0.2)' : 'none',
+            backdropFilter: 'blur(12px)',
+          }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          aria-label={muted ? 'Unmute' : 'Mute'}
+          aria-label={playing ? 'Pause music' : 'Play music'}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          {muted ? '🔇' : '🎵'}
+          {playing ? '🎵' : '🔇'}
         </motion.button>
       )}
     </>
