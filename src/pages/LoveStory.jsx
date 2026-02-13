@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import { useRef } from 'react'
 
 const MESSAGES = [
   {
@@ -34,17 +33,34 @@ const MESSAGES = [
   },
 ]
 
-function MessageCard({ message, index }) {
+function TimelineDot({ index }) {
   return (
     <motion.div
-      className="relative"
-      initial={{ opacity: 0, x: index % 2 === 0 ? -60 : 60, y: 20 }}
+      className="absolute left-0 sm:left-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-warm to-rose-soft border-2 border-dark -translate-x-1/2 z-10 shadow-md shadow-rose-warm/30"
+      style={{ top: 4 }}
+      initial={{ scale: 0 }}
+      whileInView={{ scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+    />
+  )
+}
+
+function MessageCard({ message, index }) {
+  const isLeft = index % 2 === 0
+
+  return (
+    <motion.div
+      className={`relative pl-8 sm:pl-0 ${isLeft ? 'sm:pr-[calc(50%+2rem)]' : 'sm:pl-[calc(50%+2rem)]'}`}
+      initial={{ opacity: 0, x: isLeft ? -40 : 40, y: 20 }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.7, delay: 0.1 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.6, delay: 0.1 }}
     >
-      <div className="relative bg-gradient-to-br from-dark-soft/90 to-dark/90 border border-rose-warm/15 rounded-3xl p-6 sm:p-8 backdrop-blur-sm">
-        <div className="absolute -top-4 left-6 w-10 h-10 rounded-full bg-gradient-to-br from-rose-warm to-rose-soft flex items-center justify-center text-lg">
+      <TimelineDot index={index} />
+
+      <div className="relative bg-gradient-to-br from-dark-mid/80 to-dark-soft/80 border border-rose-warm/10 rounded-2xl p-5 sm:p-6 backdrop-blur-sm hover:border-rose-warm/25 transition-colors duration-300">
+        <div className="absolute -top-3 left-5 w-8 h-8 rounded-full bg-gradient-to-br from-rose-warm to-rose-soft flex items-center justify-center text-sm shadow-md shadow-rose-warm/20">
           {message.icon}
         </div>
 
@@ -52,13 +68,9 @@ function MessageCard({ message, index }) {
           <span className="font-cursive text-gold-light text-xl">
             {message.nickname}...
           </span>
-          <p className="mt-3 text-rose-pale/90 text-base sm:text-lg leading-relaxed">
+          <p className="mt-2 text-rose-pale/80 text-base leading-relaxed font-light">
             {message.text}
           </p>
-        </div>
-
-        <div className="absolute -bottom-2 -right-2 text-rose-warm/10 text-4xl pointer-events-none select-none">
-          ❤
         </div>
       </div>
     </motion.div>
@@ -68,48 +80,59 @@ function MessageCard({ message, index }) {
 export default function LoveStory({ onNext }) {
   return (
     <motion.div
-      className="min-h-screen py-16 px-4 sm:px-6 relative"
+      className="min-h-screen min-h-dvh py-16 px-4 sm:px-6 relative"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-dark via-dark-soft/50 to-dark" />
+      <div className="absolute inset-0 bg-gradient-to-b from-dark via-dark-soft/40 to-dark" />
 
-      <div className="relative z-10 max-w-lg mx-auto">
+      <div className="relative z-10 max-w-2xl mx-auto">
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-14"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <h1 className="font-cursive text-3xl sm:text-4xl text-rose-light mb-2">
+          <motion.div
+            className="text-4xl mb-4"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+          >
+            💌
+          </motion.div>
+          <h1 className="font-cursive text-4xl sm:text-5xl text-rose-light mb-3 leading-tight">
             Humari Kahani
           </h1>
-          <p className="text-rose-light/40 text-sm">scroll karo neeche...</p>
+          <p className="text-rose-light/30 text-sm tracking-wider uppercase">scroll karo neeche</p>
         </motion.div>
 
-        <div className="space-y-8">
-          {MESSAGES.map((msg, i) => (
-            <MessageCard key={i} message={msg} index={i} />
-          ))}
+        <div className="relative">
+          <div className="absolute left-0 sm:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-rose-warm/30 via-rose-warm/10 to-transparent -translate-x-1/2" />
+
+          <div className="space-y-10">
+            {MESSAGES.map((msg, i) => (
+              <MessageCard key={i} message={msg} index={i} />
+            ))}
+          </div>
         </div>
 
         <motion.div
-          className="text-center mt-16"
+          className="text-center mt-16 pb-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <p className="text-rose-light/50 mb-6 text-sm">aur bhi hai Buggu...</p>
+          <p className="text-rose-light/40 mb-8 text-sm font-light">aur bhi hai Buggu...</p>
           <motion.button
             onClick={onNext}
-            className="px-10 py-4 rounded-2xl bg-gradient-to-r from-rose-warm to-rose-soft text-white text-lg font-semibold cursor-pointer"
-            whileHover={{ scale: 1.05 }}
+            className="px-12 py-5 rounded-2xl bg-gradient-to-r from-rose-warm to-rose-soft text-white text-lg font-semibold cursor-pointer"
+            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(220, 20, 60, 0.3)' }}
             whileTap={{ scale: 0.95 }}
           >
-            Aage Chalo →
+            Aage Chalo
           </motion.button>
         </motion.div>
       </div>

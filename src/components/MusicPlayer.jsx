@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 
 export default function MusicPlayer({ shouldPlay }) {
   const [muted, setMuted] = useState(false)
-  const iframeRef = useRef(null)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -15,7 +15,6 @@ export default function MusicPlayer({ shouldPlay }) {
     <>
       {loaded && (
         <iframe
-          ref={iframeRef}
           src={`https://www.youtube.com/embed/6x8HVdS_TJs?autoplay=1&loop=1&playlist=6x8HVdS_TJs&controls=0&showinfo=0&rel=0&mute=${muted ? 1 : 0}`}
           className="hidden"
           allow="autoplay; encrypted-media"
@@ -23,13 +22,15 @@ export default function MusicPlayer({ shouldPlay }) {
         />
       )}
       {loaded && (
-        <button
+        <motion.button
           onClick={() => setMuted(!muted)}
-          className="fixed top-4 right-4 z-50 w-12 h-12 rounded-full bg-rose-deep/80 backdrop-blur-sm border border-rose-warm/30 flex items-center justify-center text-xl transition-all duration-300 hover:scale-110 hover:bg-rose-rich/90 cursor-pointer"
+          className="fixed top-5 right-5 z-50 w-11 h-11 rounded-full bg-dark-mid/80 backdrop-blur-md border border-rose-warm/20 flex items-center justify-center text-lg transition-all duration-300 hover:border-rose-warm/50 cursor-pointer"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           aria-label={muted ? 'Unmute' : 'Mute'}
         >
           {muted ? '🔇' : '🎵'}
-        </button>
+        </motion.button>
       )}
     </>
   )

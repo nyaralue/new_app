@@ -1,18 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
-const HEART_CHARS = ['❤', '💕', '💗', '♥', '💖']
+const HEARTS = ['❤', '💕', '💗', '♥', '💖', '🤍', '💘']
 
-function Heart({ id, onDone }) {
-  const [style] = useState(() => ({
-    left: `${Math.random() * 100}%`,
-    animationDuration: `${4 + Math.random() * 6}s`,
-    animationDelay: `${Math.random() * 3}s`,
-    fontSize: `${12 + Math.random() * 18}px`,
-    opacity: 0.3 + Math.random() * 0.4,
-  }))
-
+function Heart({ data, onDone }) {
   useEffect(() => {
-    const timeout = setTimeout(onDone, 10000)
+    const timeout = setTimeout(onDone, 12000)
     return () => clearTimeout(timeout)
   }, [onDone])
 
@@ -20,46 +12,46 @@ function Heart({ id, onDone }) {
     <span
       className="absolute bottom-0 pointer-events-none select-none"
       style={{
-        ...style,
-        animation: `floatUp ${style.animationDuration} ${style.animationDelay} linear forwards`,
+        left: `${data.left}%`,
+        fontSize: `${data.size}px`,
+        opacity: data.opacity,
+        animation: `floatUp ${data.duration}s ${data.delay}s linear forwards`,
+        filter: `blur(${data.blur}px)`,
       }}
     >
-      {HEART_CHARS[id % HEART_CHARS.length]}
+      {HEARTS[data.index % HEARTS.length]}
     </span>
   )
 }
 
 export default function FloatingHearts() {
   const [hearts, setHearts] = useState([])
-  const [counter, setCounter] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCounter(c => c + 1)
-      setHearts(prev => [...prev, { id: Date.now() + Math.random() }])
-    }, 800)
+      setHearts(prev => [...prev.slice(-25), {
+        id: Date.now() + Math.random(),
+        left: Math.random() * 100,
+        size: 10 + Math.random() * 20,
+        opacity: 0.15 + Math.random() * 0.35,
+        duration: 6 + Math.random() * 8,
+        delay: Math.random() * 0.5,
+        blur: Math.random() < 0.3 ? 1 : 0,
+        index: Math.floor(Math.random() * HEARTS.length),
+      }])
+    }, 1200)
     return () => clearInterval(interval)
   }, [])
 
-  const removeHeart = (id) => {
+  const removeHeart = useCallback((id) => {
     setHearts(prev => prev.filter(h => h.id !== id))
-  }
+  }, [])
 
   return (
-    <>
-      <style>{`
-        @keyframes floatUp {
-          0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 0.5; }
-          100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
-        }
-      `}</style>
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {hearts.map(h => (
-          <Heart key={h.id} id={counter} onDone={() => removeHeart(h.id)} />
-        ))}
-      </div>
-    </>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {hearts.map(h => (
+        <Heart key={h.id} data={h} onDone={() => removeHeart(h.id)} />
+      ))}
+    </div>
   )
 }
